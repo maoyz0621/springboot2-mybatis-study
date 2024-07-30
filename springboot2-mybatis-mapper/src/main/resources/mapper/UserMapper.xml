@@ -4,15 +4,15 @@
 
 <!--　
     namespace:命名空间,为接口全类名 -->
-<mapper namespace="com.myz.springboot2.mybatis.encrypt.domain.UserMapper">
+<mapper namespace="com.myz.springboot2.mybatis.infra.mapper.UserMapper">
     <!-- id:唯一标示，为接口中的方法名
          resultType：返回值类型,依然使用实体类型 -->
-    <select id="selectAll" resultType="com.myz.springboot2.mybatis.encrypt.domain.entity.User">
+    <select id="selectAll" resultType="com.myz.springboot2.mybatis.infra.entity.User">
         SELECT *
         FROM t_user
     </select>
 
-    <select id="selectById" resultType="com.myz.springboot2.mybatis.encrypt.domain.entity.User">
+    <select id="selectById" resultType="com.myz.springboot2.mybatis.infra.entity.User">
         SELECT id, last_name, gender, email
         from t_user
         <where>
@@ -28,7 +28,7 @@
     <!--    </select>-->
 
     <!--　多参数查询　,使用if 条件判断的参数需要加上 @Param注解 -->
-    <select id="selectByIdAndGender" resultType="com.myz.springboot2.mybatis.encrypt.domain.entity.User">
+    <select id="selectByIdAndGender" resultType="com.myz.springboot2.mybatis.infra.entity.User">
         SELECT *
         FROM t_user
         <where>
@@ -42,7 +42,7 @@
     </select>
 
     <!-- 多参数查询 ,根据pojo-->
-    <select id="selectByPOJO" resultType="com.myz.springboot2.mybatis.encrypt.domain.entity.User">
+    <select id="selectByPOJO" resultType="com.myz.springboot2.mybatis.infra.entity.User">
         SELECT *
         FROM t_user
         <where>
@@ -52,7 +52,7 @@
     </select>
 
     <!-- 多参数查询 ,根据map-->
-    <select id="selectByMap" resultType="com.myz.springboot2.mybatis.encrypt.domain.entity.User">
+    <select id="selectFromMap" resultType="com.myz.springboot2.mybatis.infra.entity.User">
         SELECT *
         FROM t_user
         <where>
@@ -79,7 +79,7 @@
         </where>
     </select>
 
-    <select id="selectAllByName" resultType="com.myz.springboot2.mybatis.encrypt.domain.entity.User">
+    <select id="selectAllByName" resultType="com.myz.springboot2.mybatis.infra.entity.User">
         SELECT *
         FROM t_user
         <where>
@@ -88,14 +88,14 @@
     </select>
 
     <!--　调用自增主键useGeneratedKeys,keyProperty主键属性　-->
-    <insert id="insertUser" parameterType="com.myz.springboot2.mybatis.encrypt.domain.entity.User"
+    <insert id="insertUser" parameterType="com.myz.springboot2.mybatis.infra.entity.User"
             useGeneratedKeys="true"
             keyProperty="id">
         INSERT INTO t_user (last_name, gender, email)
         VALUES (#{lastName}, #{gender}, #{email})
     </insert>
 
-    <insert id="batchInsert" parameterType="com.myz.springboot2.mybatis.encrypt.domain.entity.User">
+    <insert id="batchInsert" parameterType="com.myz.springboot2.mybatis.infra.entity.User">
         INSERT INTO t_user (last_name, gender, email)
         VALUES
         <foreach collection="users" item="item" separator=",">
