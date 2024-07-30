@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Configuration后面的status，这个用于设置log4j2自身内部的信息输出，可以不设置，当设置成trace时，你会看到log4j2内部各种详细输出-->
+<!--monitorInterval：Log4j能够自动检测修改配置 文件和重新配置本身，设置间隔秒数-->
+<!--log4j2.xml改成log4j2-spring.xml交由spring加载-->
+<configuration monitorInterval="5">
+    <!--日志级别以及优先级排序: OFF > FATAL > ERROR > WARN > INFO > DEBUG > TRACE > ALL -->
+
+    <!--变量配置-->
+    <Properties>
+        <!-- 定义日志输出的根目录 -->
+        <Property name="LOG_PATH">./all-logs</Property>
+        <property name="LOG_FILE">auth-server</property>
+        <!-- 格式化输出：%date表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度 %msg：日志消息，%n是换行符-->
+        <!-- %style,%highlight：彩色控制台输出    %logger{36} 表示 Logger 名字最长36个字符 -->
+        <property name="LOG_PATTERN"
+                  value="%d{yyyy-MM-dd HH:mm:ss.SSS} %style{%-5level}{bright,magenta} [%thread] %style{[TraceId:%X{trace_id}]}{bright,Cyan} %style{[TID:%X{TID}]}{bright,Yellow} %logger{36} - %msg%n"/>
+    </Properties>
+
+    <appenders>
+
+        <console name="Console" target="SYSTEM_OUT">
+            <!--输出日志的格式  disableAnsi="false"为了开启log4j2的彩色日志-->
+            <PatternLayout pattern="${LOG_PATTERN}" disableAnsi="false"/>
+            <!--控制台只输出level及其以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+        </console>
+
+        <!-- skywalking grpc 日志收集 8.4.0版本开始支持 -->
+        <GRPCLogClientAppender name="grpc-log">
+            <PatternLayout
+                    pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [traceId:%X{trace_id}] [%t] %-5level %logger{36} - %msg%n"/>
+        </GRPCLogClientAppender>
+
+        <!--  按照每天生成日志文件  -->
+        <RollingFile name="RollingFile" fileName="${LOG_PATH}/${LOG_FILE}.log"
+                     filePattern="${LOG_PATH}/${LOG_FILE}.log.%d{yyyy-MM-dd}.%i.log.history">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <!--每个文件的大小限制-->
+                <SizeBasedTriggeringPolicy size="50MB"/>
+                <!--每天零点滚动一次-->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <!-- 每天的文件分片数量-按最大来算 -->
+            <DefaultRolloverStrategy max="102">
+                <Delete basePath="${LOG_PATH}/logs/" maxDepth="2">
+                    <IfFileName glob="*.log.history">
+                        <IfAny>
+                            <!-- 日志文件保留30天，超过的日志会被清除 -->
+                            <IfLastModified age="30d"/>
+                            <!-- 文件总大小，超过的日志会被清除 -->
+                            <IfAccumulatedFileSize exceeds="5GB"/>
+                        </IfAny>
+                    </IfFileName>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+    </appenders>
+
+
+    <Loggers>
+        <logger name="com.a.eye.skywalking.ui" level="debug" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="grpc-log"/>
+        </logger>
+        <logger name="org.apache.skywalking.apm.dependencies" level="INFO"></logger>
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <!--只有加入grpc-log配置，SkyWalking的可视化界面的日志、以及追踪里面的相关日志才能生成！-->
+            <AppenderRef ref="grpc-log"/>
+            <AppenderRef ref="RollingFile"/>
+        </Root>
+    </Loggers>
+
+
+</configuration>

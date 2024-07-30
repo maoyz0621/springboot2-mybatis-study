@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.myz.springboot2.mybatis.dynamic.mapper.DynamicQueryMapper">
+    <insert id="insert">
+        insert into ${tableName} (${insertField}) values
+        <foreach collection="values" item="value" open="(" close=")" separator=",">
+            #{value}
+        </foreach>
+    </insert>
+
+    <update id="update">
+        update ${tableName}
+        set ${ew.sqlSet} ${ew.customSqlSegment}
+    </update>
+
+    <delete id="delete">
+        delete
+        from ${tableName} ${ew.customSqlSegment}
+    </delete>
+
+    <select id="select" resultType="java.util.Map">
+        select
+        <if test="ew.sqlSelect != null and ew.sqlSelect != ''">
+            ${ew.sqlSelect}
+        </if>
+        <if test="ew.sqlSelect == null or ew.sqlSelect == ''">
+            *
+        </if>
+        from ${tableName} ${ew.customSqlSegment}
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+
+    </select>
+    <select id="selectLargeData">
+
+    </select>
+</mapper>

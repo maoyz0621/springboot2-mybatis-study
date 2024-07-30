@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite:${sqlite.home}/data/test.db?date_string_format=yyyy-MM-dd HH:mm:ss
+    password: 123456
